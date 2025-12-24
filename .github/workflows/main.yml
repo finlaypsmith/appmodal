@@ -8,6 +8,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # 添加写入权限，允许 GitHub Actions 推送代码到仓库
+    permissions:
+      contents: write
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
