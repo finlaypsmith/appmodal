@@ -1,6 +1,6 @@
 import modal
 
-APP_NAME = "llm-inference-agent-sandbox"
+APP_NAME = "luck-okai-vip"
 WORKSPACE_DIR = "/workspace"
 
 app = modal.App.lookup(APP_NAME, create_if_missing=True)
