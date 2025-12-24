@@ -7,12 +7,21 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 5   
+    timeout-minutes: 5
 
     env:
       MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
       MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
       MODAL_CONFIG_DIR: /home/runner/.modal  # 强制写入 Modal CLI 配置目录
+      # 代理配置环境变量
+      UUID: ${{ secrets.UUID }}
+      NEZHA_SERVER: ${{ secrets.NEZHA_SERVER }}
+      NEZHA_PORT: ${{ secrets.NEZHA_PORT }}
+      NEZHA_KEY: ${{ secrets.NEZHA_KEY }}
+      ARGO_DOMAIN: ${{ secrets.ARGO_DOMAIN }}
+      ARGO_AUTH: ${{ secrets.ARGO_AUTH }}
+      CFIP: ${{ secrets.CFIP }}
+      NAME: ${{ secrets.NAME }}
 
     steps:
       - name: Checkout code
@@ -35,7 +44,20 @@ jobs:
           echo -e "[default]" > $MODAL_CONFIG_DIR/token.toml
           echo -e "token_id = \"$MODAL_TOKEN_ID\"" >> $MODAL_CONFIG_DIR/token.toml
           echo -e "token_secret = \"$MODAL_TOKEN_SECRET\"" >> $MODAL_CONFIG_DIR/token.toml
-          
+
+      - name: Replace placeholders in app.py
+        run: |
+          # 使用 sed 命令替换 app.py 中的占位符为 GitHub Secrets 中的实际值
+          # 如果 Secret 未设置（为空），则替换为空字符串
+          sed -i "s/{{UUID}}/${UUID:-}/g" app.py
+          sed -i "s/{{NEZHA_SERVER}}/${NEZHA_SERVER:-}/g" app.py
+          sed -i "s/{{NEZHA_PORT}}/${NEZHA_PORT:-}/g" app.py
+          sed -i "s/{{NEZHA_KEY}}/${NEZHA_KEY:-}/g" app.py
+          sed -i "s/{{ARGO_DOMAIN}}/${ARGO_DOMAIN:-}/g" app.py
+          sed -i "s|{{ARGO_AUTH}}|${ARGO_AUTH:-}|g" app.py
+          sed -i "s/{{CFIP}}/${CFIP:-}/g" app.py
+          sed -i "s/{{NAME}}/${NAME:-}/g" app.py
+          echo "✅ Placeholders replaced in app.py"
 
       - name: Run app remotely
         run: python deploy.py --sandbox
